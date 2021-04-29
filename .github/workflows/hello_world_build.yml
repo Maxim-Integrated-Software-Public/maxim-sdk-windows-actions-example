@@ -23,13 +23,6 @@ jobs:
           cd MaximSDK
           7z x Tools.7z
           7z x Libraries.7z
-         
-      - name: Build Info Echo
-        run: |
-          echo "The job was automatically triggered by a ${{ github.event_name }} event."
-          echo "This job is now running on a ${{ runner.os }} ${env:computername} server hosted by GitHub!"
-          echo "The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }} and sha is ${{github.sha}}."
-          echo "Build number is ${{github.run_number}} and build ID is ${{github.run_id}}"
           
       - name: Build MAX78000 Firmware
         run: |
@@ -56,14 +49,9 @@ jobs:
             exit -1
           }
           
-      - name: Prepare Release
-        run: |          
-          mkdir release
-          mv hello_world\build\max78000.bin release\max78000_v${{ github.run_number }}.bin
-          
       - uses: actions/upload-artifact@v2
         if: always()
         with:
           name: hello_world_release_v${{ github.run_number }}
-          path: release/**
+          path: hello_world/build/max78000.bin
           
