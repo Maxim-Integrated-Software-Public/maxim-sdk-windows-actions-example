@@ -1,0 +1,69 @@
+name: Hello World
+
+on: [push]
+
+jobs:
+  build_firmware:
+    name: Build Firmware
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+          
+      - name: Checkout Maxim SDK
+        uses: actions/checkout@v2
+        with:
+          repository: Maxim-Integrated-Software-Public/maxim-sdk-windows-actions
+          path: MaximSDK
+          lfs: 'true'
+
+      - name: Prepare Maxim Toolchain and SDK
+        run: |
+          cd MaximSDK
+          7z x Tools.7z
+          7z x Libraries.7z
+         
+      - name: Build Info Echo
+        run: |
+          echo "The job was automatically triggered by a ${{ github.event_name }} event."
+          echo "This job is now running on a ${{ runner.os }} ${env:computername} server hosted by GitHub!"
+          echo "The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }} and sha is ${{github.sha}}."
+          echo "Build number is ${{github.run_number}} and build ID is ${{github.run_id}}"
+          
+      - name: Build MAX78000 Firmware
+        run: |
+          @"
+          cd "${{ github.workspace }}"
+          export MAXIM_PATH="${{github.workspace}}\MaximSDK"
+          export FIRMWARE_PATH="`$MAXIM_PATH\Libraries"
+          export TOOLCHAIN_PATH="`$MAXIM_PATH\Tools"
+          export PATH="`$TOOLCHAIN_PATH\GNUTools\bin;`$TOOLCHAIN_PATH\MinGW\msys\1.0\bin;`$PATH"
+          
+          echo "*-*-*-*-*-* BUILD STARTED -*-*-*-*-*-"
+          cd "hello_world"
+          make -r -j
+          if [ `$? -ne 0 ]; then
+            echo "BUILD IS FAILED!"
+          exit -1
+          fi
+          echo "*-*-*-*-*-* BUILD FINISHED -*-*-*-*-*-"
+          
+          "@ | Out-File -Encoding ASCII -filepath run_build.sh
+          $env:Path += ";${{ github.workspace }}\MaximSDK\Tools\GNUTools\bin"
+          ${{ github.workspace }}\MaximSDK\Tools\MinGW\msys\1.0\bin\sh --login -i ${{ github.workspace }}\run_build.sh
+          if (!$?) {
+            exit -1
+          }
+          
+      - name: Prepare Release
+        run: |          
+          mkdir release
+          mv hello_world\build\hello_world.bin release\hello_world_v${{ github.run_number }}.bin
+          
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: hello_world_release_v${{ github.run_number }}
+          path: release/**
+          
