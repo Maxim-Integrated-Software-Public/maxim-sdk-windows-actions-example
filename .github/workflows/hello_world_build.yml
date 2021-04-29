@@ -59,7 +59,7 @@ jobs:
       - name: Prepare Release
         run: |          
           mkdir release
-          mv hello_world\build\hello_world.bin release\hello_world_v${{ github.run_number }}.bin
+          mv hello_world\build\max78000.bin release\max78000_v${{ github.run_number }}.bin
           
       - uses: actions/upload-artifact@v2
         if: always()
