@@ -1,3 +1,3 @@
 # maxim-sdk-windows-actions-example
 
-Maxim Micro SDK Github Actions Hello World example.
+Github Actions MAX78000 Hello World build example.
