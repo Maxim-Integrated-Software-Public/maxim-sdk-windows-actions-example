@@ -4,12 +4,15 @@ on: [push]
 
 jobs:
   build:
-    name: Build Firmware
+    name: Test Build
     runs-on: windows-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+        
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Nuget
         run: |
